@@ -1,112 +1,22 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-  <link rel="stylesheet" type="text/css" href="http://static.ename.com.cn/templet/system2/system.css?v=20210719888" />
-  <script type="text/javascript" src="http://static.ename.com.cn/js/jquery-1.11.3.min.js"></script>
-  <title>homotribe.com域名出售，this domain is for sale</title>
-  <meta name="keywords" content="homotribe.com">
-  <meta name="description" content="homotribe.com">
-</head>
-
-<body>
-  <!-- 头部部分 -->
-  <div class="header">
-    <!-- 头部左边 -->
-    <div class="left-block">
-      <div class="inner1">
-        <div class="inner1-left">
-          <span>homotribe.com</span>
-        </div>
-      </div>
-      <div class="inner2">
-        <span>您正在访问的域名可以转让！This domain is for sale.</span>
-      </div>
-    </div>
+    <meta charset="UTF-8">
+    <title>测试页</title>
     <script>
-      var inner1_w = $('.header .left-block .inner1').width()
-      var inner1_left_w = $('.header .left-block .inner1 .inner1-left').width()
-      var inner1_right_w = $('.header .left-block .inner1 .inner1-right').width()
-      if (inner1_left_w + inner1_right_w + 50 >= inner1_w) {
-        var inner1_right_w = inner1_w - inner1_left_w - 35
-        $('.header .left-block .inner1 .inner1-right').css({ "width": inner1_right_w })
-      }
+        // 关键：监听页面加载，立即发送消息
+        window.onload = function() {
+            const mchData = {
+                action: 'onIframeReady',
+                displayStyle: 'SHOW_CUSTOM_PAGE'
+            };
+            // 注意：第二个参数必须是 "https://payapp.weixin.qq.com"
+            window.parent.postMessage(JSON.stringify(mchData), 'https://payapp.weixin.qq.com');
+            console.log('测试页消息已发送');
+        };
     </script>
-    <!-- 头部左边 --> <!-- 头部右边 -->
-    <div class="right-block">
-      <a href="http://whois.ename.net/homotribe.com" target="_blank">
-        <div class="inner1">
-          <i></i>
-          <span>whois查询</span>
-        </div>
-      </a>
-    </div>
-    <!-- 头部右边 -->
-  </div>
-  <!-- 头部部分 -->
-
-  <!-- 内容部分 -->
-  <div class="main-content">
-    <div class="main-content-top-bar"></div>
-    <div class="left-block">
-      <!-- 左边卡片1 -->
-      <div class="card1">
-        <div class="inner1">
-          <span>交易信息</span>
-        </div>
-        <div class="sep-line"></div>
-        <div class="inner2">
-          <span class="text-left">交易类型 : </span>
-          <span class="text-right">一口价</span>
-        </div>
-        <div class="inner2">
-          <span class="text-left">当前价格 : </span>
-          <span class="text-right\">1688000</span>
-        </div>
-      </div>
-      <!-- 左边卡片1 -->
-      <!-- 左边卡片2-->
-      <div class="card2">
-
-        <div class="inner1">
-          <div>如果您对该域名感兴趣，请点击<a target="_blank" href="mailto:liqingyun.chn@qq.com">联系我</a></div>
-          <div>If you would like to purchase this domain,please <a href="mailto:liqingyun.chn@qq.com" target="_blank">click here</a> to make an offer.</div>
-        </div>
-      </div>
-      <!-- 左边卡片2 -->
-      <!-- 左边卡片3 -->
-      <div class="card3" style="display:none">
-
-      </div>
-      <!-- 左边卡片3 -->
-    </div>
-    <div class="right-block">
-      <div class="inner1">
-        <span>掌柜名片</span>
-      </div>
-      <span class="avatar">
-        <img src="http://www.ename.com.cn/avatar/202101178251527091.png">
-      </span>
-      <div class="inner3">原始人部落</div>
-    </div>
-  </div>
-  <!-- 内容部分 -->
-
-  <!-- 底部部分 -->
-  <div class="footer">
-
-  </div>
-  <!-- 底部部分 -->
-
-  <!-- 版权 -->
-  <div class="copyright">
-    <span>Copyright:</span>
-    <script type="text/javascript">var date = new Date(); var year = date.getFullYear(); window.document.write(year);</script>
-    <span>厦门易名科技股份有限公司 All Rights Reserved</span>
-  </div>
-  <!-- 版权 -->
+</head>
+<body>
+    <h1>极简测试页</h1>
 </body>
-
 </html>
