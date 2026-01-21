@@ -1,24 +1,187 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>测试页</title>
-    <script src="https://res2.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
-    <script src="https://wx.gtimg.com/pay_h5/goldplan/js/jgoldplan-1.0.0.js"></script>
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>高德地图点位展示</title>
+    <style>
+      html,
+      body,
+      #map {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        position: relative;
+        z-index: 1;
+        width: 100vw;
+        height: 100vh;
+      }
+      #info-panel {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 250px;
+        background: #fff;
+        border: 1px solid #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: none;
+        z-index: 1000;
+      }
+      #info-panel__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      #info-title {}
+      #info-title .avatar {}
+      #info-title .avatar img {
+        display: block;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #eee;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+      }
+      #info-title .avatar img:hover {
+        transform: scale(1.2);
+      }
+      #info-close {
+        cursor: pointer;
+      }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js"></script>
+    <!-- 高德安全密钥 -->
     <script>
-        // 关键：监听页面加载，立即发送消息
-        window.onload = function() {
-            const mchData = {
-                action: 'onIframeReady',
-                displayStyle: 'SHOW_CUSTOM_PAGE'
-            };
-            // 注意：第二个参数必须是 "https://payapp.weixin.qq.com"
-            window.parent.postMessage(JSON.stringify(mchData), 'https://payapp.weixin.qq.com');
-            console.log('测试页消息已发送');
-        };
+      window._AMapSecurityConfig = {
+        securityJsCode: "930e02c4829c516a50e684200e6ecdd4",
+      };
     </script>
-</head>
-<body>
-    <h1>极简测试页</h1>
-</body>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=c17aae58ea3f4cf1c000f5c265477ac1"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="info-panel">
+      <div id="info-panel__header">
+        <div id="info-title">点位信息</div>
+        <div id="info-close">×</div>
+      </div>
+      <div id="info-content"></div>
+    </div>
+
+    <script>
+      // 预留点位坐标数组（格式：[lng, lat]）
+      let pointList = [];
+      let map = null;
+
+      const markerIconUrl = "https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png";
+      const markerIcon = new AMap.Icon({
+        image: markerIconUrl,
+        size: new AMap.Size(24, 32),
+        imageSize: new AMap.Size(24, 32),
+      });
+
+      const infoPanel = document.getElementById("info-panel");
+      const infoTitle = document.getElementById("info-title");
+      const infoContent = document.getElementById("info-content");
+      const infoClose = document.getElementById("info-close");
+
+      const formatValue = (value) => (value === null || value === undefined || value === "" ? "-" : value);
+
+      const openInfoPanel = (item) => {
+        if (!infoPanel || !infoContent || !infoTitle) return;
+        const userIdHash = SparkMD5.hash(`${item.technicianId}`);
+        const imgSrc = `https://kys-cdn.kangyishou.com/prod/kys-platform/avatar/technician/${userIdHash}.jpg?t=1&x-oss-process=image/resize,w_200,h_200`;
+        console.log('[GS] 用户ID Hash:', userIdHash);
+        infoTitle.innerHTML = `<div class="avatar"><img src="${imgSrc}" /></div>`;
+        infoContent.innerHTML = `
+          <div class="info-row"><span>编号: </span><span>${formatValue(item.technicianId)}</span></div>
+          <div class="info-row"><span>距离: </span><span>${formatValue(item.distance)}km</span></div>
+          <div class="info-row"><span>经度: </span><span>${formatValue(item.longitude)}</span></div>
+          <div class="info-row"><span>纬度: </span><span>${formatValue(item.latitude)}</span></div>
+        `;
+        infoPanel.style.display = "block";
+      };
+
+      const closeInfoPanel = () => {
+        if (infoPanel) infoPanel.style.display = "none";
+      };
+
+      if (infoClose) {
+        infoClose.addEventListener("click", closeInfoPanel);
+      }
+
+      const initMap = () => {
+        if (map) return;
+        map = new AMap.Map("map", {
+          zoom: 12,
+          center: pointList[0]
+            ? [pointList[0].longitude, pointList[0].latitude]
+            : [113.0957320, 28.2271731],
+        });
+      };
+
+      const renderMarkers = () => {
+        initMap();
+        if (!pointList.length) return;
+        const markers = pointList.map((item) => {
+          const marker = new AMap.Marker({
+            position: [item.longitude, item.latitude],
+            icon: markerIcon,
+            offset: new AMap.Pixel(-16, -32),
+          });
+          marker.on("click", () => openInfoPanel(item));
+          return marker;
+        });
+        map.add(markers);
+        map.setFitView(markers, false, [40, 40, 40, 40]);
+      };
+
+      (async function() {
+        try {
+          const storedToken = sessionStorage.getItem('__kys_token__');
+          const tokenPayload = storedToken ? JSON.parse(storedToken) : null;
+          const TOKEN = tokenPayload?.token || '';
+          const headers = {
+            'Accept': 'application/json',
+            'no-auth': 'platform',
+            'token': TOKEN
+          };
+
+          const { origin, pathname } = window.location;
+          let referrer = origin + (pathname.indexOf('/test') > -1 ? '/test' : '');
+          targetUrl = `${ referrer }/qingyang/`;
+          
+          const res = await fetch(`${ referrer }/gis/v1/route/nearby-technicians?location=113.08093%2C28.24595&technicianIds=`, {
+            method: 'GET',
+            credentials: 'include',
+            referrer: targetUrl,
+            headers
+          });
+
+          const payload = await res.json();
+          console.log('[GS] 技师位置信息：', payload);
+          pointList = Array.isArray(payload?.data) ? payload.data : [];
+        } catch (error) {
+          console.error('[GS] 技师位置信息', error);
+          console.warn('[GS] 使用模拟数据');
+          pointList = [{"technicianId":"1","distance":3.6168,"longitude":113.09937447309494,"latitude":28.217784573701458,"time":"2026-01-21T07:58:10.957Z","type":"auto"},{"technicianId":"1064","distance":3.6237,"longitude":113.09976607561111,"latitude":28.217913844480584,"time":"2026-01-21T08:51:58.008Z","type":"auto"},{"technicianId":"952","distance":3.6265,"longitude":113.09979289770126,"latitude":28.217898636153627,"time":"2026-01-21T08:48:12.876Z","type":"auto"},{"technicianId":"1075","distance":3.6284,"longitude":113.09968560934067,"latitude":28.217822594518843,"time":"2026-01-20T07:47:16.649471Z","type":"auto"},{"technicianId":"998","distance":3.6289,"longitude":113.0997285246849,"latitude":28.21784033756696,"time":"2026-01-21T08:51:46.951Z","type":"auto"},{"technicianId":"946","distance":3.6324,"longitude":113.09986263513565,"latitude":28.21787328894203,"time":"2026-01-21T08:34:29.138Z","type":"auto"},{"technicianId":"1013","distance":3.6395,"longitude":113.09976071119308,"latitude":28.21774655288406,"time":"2026-01-21T08:22:42.537493Z","type":"auto"},{"technicianId":"449","distance":3.6461,"longitude":113.10002893209457,"latitude":28.21781752507652,"time":"2026-01-21T08:34:42.442Z","type":"auto"}];
+        } finally {
+          renderMarkers();
+        }
+      })();
+    </script>
+  </body>
 </html>
